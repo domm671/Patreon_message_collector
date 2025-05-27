@@ -16,10 +16,7 @@
 
 ## 安装步骤
 
-1. 下载此仓库的ZIP包并解压，或使用git克隆：
-   ```
-   git clone [仓库地址]
-   ```
+1. 下载或使用git克隆此仓库代码
 
 2. 打开Chrome浏览器，访问 `chrome://extensions/`
 

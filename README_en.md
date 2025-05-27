@@ -16,10 +16,7 @@ A Chrome browser extension for saving important messages and replies in Patreon 
 
 ## Installation Steps
 
-1. Download the ZIP package from this repository and extract it, or clone using git:
-   ```
-   git clone [repository URL]
-   ```
+1. Download or clone this repository
 
 2. Open Chrome browser and visit `chrome://extensions/`
 
