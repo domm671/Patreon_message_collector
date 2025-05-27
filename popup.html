@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Patreon Message Collector</title>
+  <style>
+    html, body {
+      width: 400px;
+      height: 600px;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f9f9f9;
+      overflow: hidden; /* 防止body出现滚动条 */
+    }
+    
+    /* 使用flex布局创建固定头部和底部，可滚动内容区域 */
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background-color: #e85b46;
+      color: white;
+      flex-shrink: 0; /* 防止头部被压缩 */
+    }
+    
+    .header h1 {
+      margin: 0;
+      font-size: 18px;
+    }
+    
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background-color: #f1f1f1;
+      border-bottom: 1px solid #ddd;
+      flex-shrink: 0; /* 防止控制栏被压缩 */
+    }
+    
+    .search-box {
+      flex-grow: 1;
+      margin-right: 10px;
+      padding: 5px 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    
+    button {
+      background-color: #e85b46;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    
+    button:hover {
+      background-color: #d04b3c;
+    }
+    
+    /* 移动按钮样式 */
+    .move-btn {
+      background-color: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      padding: 3px 6px;
+      margin-right: 5px;
+      font-size: 10px;
+      cursor: pointer;
+      line-height: 1;
+    }
+    
+    .move-btn:hover {
+      background-color: #5a6268;
+    }
+    
+    .move-btn.disabled {
+      background-color: #adb5bd;
+      cursor: not-allowed;
+    }
+    
+    /* 删除按钮样式 */
+    .delete-btn {
+      margin-left: 5px;
+    }
+    
+    /* 复选框容器样式 */
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      margin-right: 10px;
+    }
+    
+    /* 自定义复选框样式 */
+    .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    .checkbox-wrapper input[type="checkbox"] {
+      margin-right: 5px;
+      cursor: pointer;
+    }
+    
+    /* 消息项中的复选框 */
+    .message-checkbox {
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+    
+    .message-list {
+      flex-grow: 1; /* 占用剩余空间 */
+      overflow-y: auto; /* 只有这里需要滚动条 */
+      padding: 8px;
+    }
+    
+    .message-item {
+      margin-bottom: 15px;
+      padding: 10px;
+      background-color: white;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      display: flex;
+    }
+    
+    .message-content-wrapper {
+      flex-grow: 1;
+    }
+    
+    /* 回复消息的样式 */
+    .reply-item {
+      border-left: 3px solid #e85b46;
+      background-color: #fffaf9;
+    }
+    
+    /* 回复标识样式 */
+    .reply-badge {
+      background-color: #e85b46;
+      color: white;
+      font-size: 10px;
+      padding: 2px 5px;
+      border-radius: 3px;
+      margin-right: 5px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    
+    .message-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      font-size: 12px;
+      color: #777;
+      align-items: center;
+    }
+    
+    .message-author {
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .message-content {
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+    
+    /* 图片展示相关样式 */
+    .message-images {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .image-wrapper {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      overflow: hidden;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .message-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.2s;
+    }
+    
+    .message-image:hover {
+      transform: scale(1.05);
+    }
+    
+    /* 图片模态框样式 */
+    .image-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      cursor: pointer;
+    }
+    
+    .modal-content {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+    }
+    
+    .message-url {
+      font-size: 12px;
+      color: #0366d6;
+      text-decoration: none;
+      display: block;
+      margin-top: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .message-actions {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+    
+    .no-messages {
+      text-align: center;
+      padding: 40px 20px;
+      color: #666;
+    }
+    
+    /* 导出对话框 */
+    .export-dialog {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 100;
+      width: 300px;
+    }
+    
+    .export-dialog.show {
+      display: block;
+    }
+    
+    .backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 99;
+    }
+    
+    .backdrop.show {
+      display: block;
+    }
+
+    /* 底部工具栏 */
+    .bottom-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background-color: #f1f1f1;
+      border-top: 1px solid #ddd;
+      flex-shrink: 0; /* 防止底部工具栏被压缩 */
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Patreon Message Collector</h1>
+    <div class="header-actions">
+      <button id="exportBtn" title="Export selected messages">Export</button>
+    </div>
+  </div>
+  
+  <div class="controls">
+    <div class="checkbox-wrapper">
+      <input type="checkbox" id="selectAllCheckbox">
+      <label for="selectAllCheckbox">Select All</label>
+    </div>
+    <div class="search-container" style="display: flex; flex-grow: 1; margin: 0 10px;">
+      <input type="text" class="search-box" id="searchBox" placeholder="Search messages...">
+      <button id="clearBtn" title="Clear search">Clear</button>
+    </div>
+  </div>
+  
+  <div id="messageList" class="message-list">
+    <!-- Messages will be inserted here -->
+    <div class="no-messages">No saved messages</div>
+  </div>
+  
+  <div class="bottom-toolbar">
+    <div class="checkbox-wrapper">
+      <span id="selectedCount">Selected: 0</span>
+    </div>
+  </div>
+  
+  <!-- Export dialog -->
+  <div class="backdrop" id="backdrop"></div>
+  <div class="export-dialog" id="exportDialog">
+    <h3>Export Selected Messages</h3>
+    <p>Select export format:</p>
+    <div>
+      <button id="exportJson">JSON</button>
+      <button id="exportTxt">Text</button>
+      <button id="exportMd">Markdown</button>
+      <button id="exportHtml">HTML</button>
+    </div>
+    <div style="margin-top: 15px; text-align: right;">
+      <button id="cancelExport">Cancel</button>
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html> 

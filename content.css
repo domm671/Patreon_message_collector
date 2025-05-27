@@ -1,0 +1,63 @@
+/* 收藏按钮样式 */
+.patron-collect-button {
+  background: transparent;
+  border: 1px solid #e85b46;
+  color: #e85b46;
+  border-radius: 4px;
+  padding: 3px 8px;
+  margin-left: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 1.2;
+}
+
+.patron-collect-button:hover {
+  background: rgba(232, 91, 70, 0.1);
+}
+
+.patron-collect-button.collected {
+  background: #e85b46;
+  color: white;
+}
+
+/* 按钮容器样式 */
+.patron-button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+  margin-bottom: 12px;
+}
+
+/* 通知样式 */
+.patron-collection-notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+  font-size: 14px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  max-width: 80%;
+  word-wrap: break-word;
+}
+
+.patron-collection-notification.fadeout {
+  animation: fadeOut 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(20px); }
+} 
